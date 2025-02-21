@@ -10,6 +10,7 @@ import ProtectedRoute from './components/utilProtectRoute'
 import BackOffice from './components/Backoffice'
 import Support from './components/Support'
 import { UserProvider } from './context/UserContext'
+import Chat from './components/Chat'
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
             <Route path='/products' element={<Products />} />
             <Route path='/backoffice' element={<ProtectedRoute><BackOffice /></ProtectedRoute>} />
             <Route path='/support' element={<Support />} />
+            <Route path='/chat/:chatToken' element={<Chat />} />
           </Route>
         </Routes>
       </BrowserRouter>

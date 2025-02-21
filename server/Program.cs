@@ -26,6 +26,7 @@ app.MapDelete("/api/logout", (Delegate)LogoutUser);
 app.MapGet("/api/issues", (Delegate)GetIssues);
 app.MapPost("/api/issues", CreateIssue);
 app.MapGet("/api/companies", GetCompanies);
+app.MapGet("/api/chat/{chatToken}", GetMessages);
 
 
 async Task<IResult> GetProducts()
@@ -246,6 +247,35 @@ async Task<IResult> GetCompanies()
         ));
     }
     return Results.Ok(companies);
+}
+
+async Task<IResult> GetMessages(string chatToken)
+{
+    Console.WriteLine("Called GetMessages - Requesting messages with token: " + chatToken);
+    var messages = new List<Message>();
+
+    await using var cmd = db.CreateCommand("SELECT * FROM message WHERE issue_id = (SELECT id FROM supportform_view WHERE token = $1)");
+    cmd.Parameters.AddWithValue(chatToken);
+    await using var reader = await cmd.ExecuteReaderAsync();
+
+    while (await reader.ReadAsync())
+    {
+        messages.Add(new Message(
+            reader.GetInt32(0),
+            reader.GetString(1),
+            reader.GetString(2),
+            reader.GetInt32(3)
+        ));
+
+    }
+    if (messages.Count < 1)
+    {
+        Console.WriteLine("No messages found for this chat token");
+        return Results.NotFound("No messages found for this chat token");
+    }
+    Console.WriteLine("Messages found");
+    return Results.Ok(messages);
+
 }
 
 await app.RunAsync();
