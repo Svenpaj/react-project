@@ -20,14 +20,13 @@ NpgsqlDataSource db = database.Connection();
 
 app.MapGet("/api", () => Results.Ok("Hello World!"));
 app.MapGet("/api/products", GetProducts);
-app.MapGet("/api/verify-session", (Delegate)verifySession);
+app.MapGet("/api/verify-session", (Func<HttpContext, Task<IResult>>)verifySession);
 app.MapPost("/api/login", LoginUser);
-app.MapDelete("/api/logout", (Delegate)LogoutUser);
-app.MapGet("/api/issues", (Delegate)GetIssues);
+app.MapDelete("/api/logout", (Func<HttpContext, Task<IResult>>)LogoutUser);
+app.MapGet("/api/issues", (Func<HttpContext, Task<IResult>>)GetIssues);
 app.MapPost("/api/issues", CreateIssue);
 app.MapGet("/api/companies", GetCompanies);
 app.MapGet("/api/chat/{chatToken}", GetMessages);
-
 
 async Task<IResult> GetProducts()
 {
@@ -138,7 +137,7 @@ async Task<IResult> LoginUser(HttpContext httpContext, UserRequest userRequest)
     return Results.Unauthorized();
 }
 
-Task<IResult> LogoutUser(HttpContext httpContext)
+static Task<IResult> LogoutUser(HttpContext httpContext)
 {
     Console.WriteLine("/api/logout has been called");
     httpContext.Session.Clear();
