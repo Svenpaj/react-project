@@ -15,6 +15,7 @@ export function UserProvider({ children }) {
                 if (response.ok) {
                     const userData = await response.json();
                     setUser(userData);
+                    console.log('Session verified:', userData);
                 }
             } catch (error) {
                 console.error('Session verification failed:', error);
@@ -31,7 +32,7 @@ export function UserProvider({ children }) {
     };
 
     const logout = () => {
-        setUser(null);
+        setUser({ id: 0, firstname: '', email: '', role: 'guest', company: '', });
     };
 
     const value = useMemo(() => ({ user, login, logout }), [user]);
@@ -50,3 +51,4 @@ export function UserProvider({ children }) {
 export function useUser() {
     return useContext(UserContext);
 }
+

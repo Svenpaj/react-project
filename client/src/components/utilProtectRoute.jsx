@@ -4,7 +4,8 @@ import { useUser } from '../context/UserContext';
 function ProtectedRoute({ children }) {
     const { user } = useUser();
 
-    if (!user) {
+    if (!user || user.role == "guest") {
+        console.log("User:", user);
         return <Navigate to="/" />;
     }
 

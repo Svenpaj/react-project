@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 export default function Home() {
+    fetch('/api/set-session', { credentials: 'include' })
     return (
         <div>
             {/* Hero Section */}

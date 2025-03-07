@@ -19,6 +19,13 @@ Database database = new Database();
 NpgsqlDataSource db = database.Connection();
 
 app.MapGet("/api", () => Results.Ok("Hello World!"));
+app.MapGet("/api/set-session", (HttpContext context) =>
+{
+    if (context.Session.GetString("UserRole") == null)
+    {
+        context.Session.SetString("UserRole", "guest");
+    }
+});
 app.MapGet("/api/products", GetProducts);
 app.MapGet("/api/verify-session", (Func<HttpContext, Task<IResult>>)verifySession);
 app.MapPost("/api/login", LoginUser);
@@ -53,7 +60,17 @@ async Task<IResult> verifySession(HttpContext context)
 {
     try
     {
+        if (context.Session.GetString("UserRole") == null)
+        {
+            context.Session.SetString("UserRole", "guest");
+        }
+        if (context.Session.GetString("UserRole") == "guest")
+        {
+            var guest = new UserView(0, "", "", "", "", "", "guest");
+            return Results.Ok(guest);
+        }
         var userId = context.Session.GetString("UserId");
+
         if (userId == null)
         {
             return Results.Unauthorized();

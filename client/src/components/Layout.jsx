@@ -11,7 +11,7 @@ function Layout() {
 
     const toggleLogoutButton = () => {
         const logoutButton = document.getElementById("logout-button");
-        if (user) {
+        if (user.id >= 1) {
             logoutButton.style.display = "block";
         } else {
             logoutButton.style.display = "none";
@@ -36,6 +36,7 @@ function Layout() {
             credentials: "include"
         });
         logout(); // Use context logout instead of localStorage
+        console.log("Logout successful!");
     };
 
     const handleSubmit = async (event) => {
@@ -73,7 +74,7 @@ function Layout() {
                 <NavLink to={"/cart"}>Cart</NavLink>
                 <NavLink to={"/backoffice"}>Backoffice</NavLink>
                 <NavLink to={"/support"}>Support Forms</NavLink>
-                {user ? (
+                {user.role != 'guest' ? (
                     <span id="logged-in-user">Welcome, {user.firstname.charAt(0).toUpperCase() + user.firstname.slice(1)}</span>
                 ) : (
                     <button id="login-button" onClick={handleLoginClick}>Login</button>
