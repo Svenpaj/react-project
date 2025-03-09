@@ -34,6 +34,7 @@ app.MapGet("/api/issues", (Func<HttpContext, Task<IResult>>)GetIssues);
 app.MapPost("/api/issues", CreateIssue);
 app.MapGet("/api/companies", GetCompanies);
 app.MapGet("/api/chat/{chatToken}", GetMessages);
+app.MapPost("/api/chat", PostMessage);
 
 async Task<IResult> GetProducts()
 {
@@ -287,11 +288,36 @@ async Task<IResult> GetMessages(string chatToken)
     if (messages.Count < 1)
     {
         Console.WriteLine("No messages found for this chat token");
-        return Results.NotFound("No messages found for this chat token");
+        await using var cmd2 = db.CreateCommand("SELECT id FROM supportform_view WHERE token = $1");
+        cmd2.Parameters.AddWithValue(chatToken);
+        await using var reader2 = await cmd2.ExecuteReaderAsync();
+
+        if (await reader2.ReadAsync())
+        {
+            return Results.Ok(reader2.GetInt32(0));
+        }
+        return Results.NotFound("No issue found with this token");
     }
     Console.WriteLine("Messages found");
     return Results.Ok(messages);
 
+}
+
+async Task<IResult> PostMessage(MessageRequest message)
+{
+    Console.WriteLine("Content: " + message.Content + " Sender: " + message.Sender + " IssueId: " + message.IssueId);
+    if (string.IsNullOrEmpty(message.Content) || string.IsNullOrEmpty(message.Sender) || message.IssueId == 0)
+    {
+        Console.WriteLine("Missing required fields");
+        return Results.BadRequest("Missing required fields");
+    }
+    Console.WriteLine("Called PostMessage - Posting message: " + message.Content);
+    await using var cmd = db.CreateCommand("INSERT INTO message (sender, message, issue_id) VALUES ($1, $2, $3)");
+    cmd.Parameters.AddWithValue(message.Sender);
+    cmd.Parameters.AddWithValue(message.Content);
+    cmd.Parameters.AddWithValue(message.IssueId);
+    await cmd.ExecuteNonQueryAsync();
+    return Results.Created("Message has been posted", message);
 }
 
 await app.RunAsync();

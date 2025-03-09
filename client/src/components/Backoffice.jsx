@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useUser } from '../context/UserContext';
-
+import { useNavigate } from 'react-router-dom';
 function BackOffice() {
+
+    let navigate = useNavigate();
 
     const { user } = useUser();
     const [issues, setIssues] = useState([]);
@@ -81,6 +83,7 @@ function BackOffice() {
                         <div className="issue-email">{issue.sender_email}</div>
                         <div className="issue-company">{issue.company}</div>
                         <div className="issue-subject">{issue.subject}</div>
+                        <div className="issue-token"><button onClick={() => navigate(`/chat/${issue.chatToken}`)}>Chat</button></div>
                         <textarea
                             className="issue-message"
                             defaultValue={issue.message}
